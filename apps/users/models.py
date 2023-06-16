@@ -39,7 +39,7 @@ class Role(UUIDModel):
 class User(UUIDModel, AbstractUser):
     email = models.EmailField('email', unique=True)
     role = models.ForeignKey(Role, models.SET_NULL, verbose_name='rol', null=True, blank=True)
-
+    telegram_id = models.CharField('ID de Telegram', max_length=128, null=True, blank=True)
     objects = UserManager()
 
     username = None
