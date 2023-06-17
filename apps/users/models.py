@@ -71,3 +71,9 @@ class User(UUIDModel, AbstractUser):
         # Always check with the auth backend.
         return _user_has_module_perms(self, app_label)
 
+
+    # @property
+    # def is_staff(self):
+    #     "Is the user a member of staff?"
+       
+    #     return self.is_staff

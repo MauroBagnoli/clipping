@@ -4,6 +4,7 @@ from django.db.models import Q
 from django.contrib import admin
 from django.contrib.auth.models import Permission
 from django.utils.translation import gettext_lazy as _
+from django.contrib.auth.forms import UserChangeForm
 
 from django.forms import widgets
 from django.contrib.auth import authenticate, password_validation

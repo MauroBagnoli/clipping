@@ -1,6 +1,10 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.forms import SetPasswordForm
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
+from django.contrib.auth import update_session_auth_hash
 
 from .models import User, Role
 from .forms import CreateUserAdminForm, RoleAdminForm
@@ -32,6 +36,23 @@ class RoleAdmin(admin.ModelAdmin):
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
+    actions = ['change_password']
+
+    def change_password(self, request, queryset):
+        if request.POST.get('post'):
+            form = SetPasswordForm(user=request.user, data=request.POST)
+            if form.is_valid():
+                for user in queryset:
+                    print('form.cleaned_data[new_password1]: ', form.cleaned_data['new_password1'])
+                    user.set_password(form.cleaned_data['new_password1'])
+                    user.save()
+                    update_session_auth_hash(request, user)
+                self.message_user(request, "Password changed successfully.")
+                return HttpResponseRedirect(request.get_full_path())
+        else:
+            form = SetPasswordForm(user=request.user)
+
+        return render(request, 'admin/change_password.html', {'form': form})
     list_display = ['email', 'first_name', 'last_name','role']
     readonly_fields = ['telegram_id']
 
@@ -43,11 +64,11 @@ class UserAdmin(admin.ModelAdmin):
     ]
     form = CreateUserAdminForm
     list_filter = ['role']
-    # permissions = [ ('manage_users', _('Manage users')) ]
+    permissions = [ ('manage_users', _('Manage users')) ]
 
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)
         if obj:
             print('form.base_fields: ', form.base_fields)
-            form.base_fields.pop('password', None)
+            # form.base_fields.pop('password', None)
         return form
