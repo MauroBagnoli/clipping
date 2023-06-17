@@ -5,7 +5,7 @@ from news_clippings_bot import urls as news_clippings_bot_urls
 admin.autodiscover()
 admin.site.enable_nav_sidebar = False
 
-admin.site.site_header = 'Clipping Clipping Admin'
+admin.site.site_header = 'Clipping Admin'
 
 urlpatterns = [
     path('admin/', admin.site.urls),

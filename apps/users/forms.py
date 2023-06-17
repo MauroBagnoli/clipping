@@ -8,6 +8,7 @@ from django.utils.translation import gettext_lazy as _
 from django.forms import widgets
 from django.contrib.auth import authenticate, password_validation
 from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth.hashers import make_password
 
 from .models import User, Role
 
@@ -19,6 +20,7 @@ class RoleAdminForm(forms.ModelForm):
         label=_('Custom permissions'),
         required=False,
     )
+
     django_permissions = forms.ModelMultipleChoiceField(
         Permission.objects.none(),
         widget=admin.widgets.FilteredSelectMultiple(_('Django permissions'), False),
@@ -39,12 +41,15 @@ class RoleAdminForm(forms.ModelForm):
         print('custom_codenames: ', custom_codenames)
 
         if kwargs.get('instance'):
+            print('kwargs[instance].permissions: ', kwargs['instance'].permissions)
             kwargs['initial'] = {
                 'custom_permissions': kwargs['instance'].permissions.filter(codename__in=custom_codenames),
                 'django_permissions': kwargs['instance'].permissions.exclude(Q(codename__in=custom_codenames))
             }
 
         super().__init__(*args, **kwargs)
+
+        print('self.fields[custom_permissions]: ', self.fields['custom_permissions'])
 
         self.fields['custom_permissions'].queryset = Permission.objects.filter(codename__in=custom_codenames)
         self.fields['django_permissions'].queryset = Permission.objects.exclude(Q(codename__in=custom_codenames))
@@ -75,12 +80,15 @@ class AuthenticationForm(forms.Form):
     email = forms.EmailField()
     password = forms.CharField()
 
+
     error_messages = {
         'inactive': _('This user is inactive.'),
         'invalid_login': _('Please enter a correct email and password.'),
     }
 
     def __init__(self, request=None, *args, **kwargs):
+        print('starting auth process')
+
         self.request = request
         self.user = None
         super().__init__(*args, **kwargs)
@@ -90,7 +98,11 @@ class AuthenticationForm(forms.Form):
         email = cleaned_data.get('email')
         password = cleaned_data.get('password')
 
+        print('email: ', email)
+
         invalid_login = forms.ValidationError(self.error_messages['invalid_login'], code='invalid_login')
+
+        print('invalid_login: ', invalid_login)
 
         if email and password:
             try:
@@ -104,6 +116,7 @@ class AuthenticationForm(forms.Form):
             if not user.is_active:
                 raise forms.ValidationError(self.error_messages['inactive'], code='inactive')
 
+            print('before authenticate')
             self.user = authenticate(self.request, username=user.email, password=password)
             if self.user is None:
                 raise invalid_login
@@ -228,7 +241,7 @@ class UserAdminForm(forms.ModelForm):
 class CreateUserAdminForm(forms.ModelForm):
     class Meta:
         model = User
-        fields = ['email', 'first_name', 'last_name', 'role']
+        fields = ['email', 'password', 'first_name', 'last_name', 'role']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -237,7 +250,13 @@ class CreateUserAdminForm(forms.ModelForm):
 
     def save(self, commit=True):
         user = super().save(commit=False)
-        user.set_unusable_password()
+        print('self.fields: ', self.fields)
+        if not user.password:
+            print('self.fields[password] ', self.fields['password'])
+            password = self.cleaned_data['password']
+            user.password = make_password(password)
+        user.is_staff = True
+
         if commit:
             user.save()
         return user
