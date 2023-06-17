@@ -14,3 +14,9 @@
 
 # python3 manage.py makemessages --locale es
 # python3 manage.py compilemessages --locale es
+
+## TO DROP DATABASE
+
+# \connect postgres;
+# drop database marilles;
+# create database marilles;

@@ -36,6 +36,8 @@ class RoleAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         custom_codenames = [p[0] for p in getattr(settings, 'CUSTOM_PERMISSIONS', [])]
 
+        print('custom_codenames: ', custom_codenames)
+
         if kwargs.get('instance'):
             kwargs['initial'] = {
                 'custom_permissions': kwargs['instance'].permissions.filter(codename__in=custom_codenames),
@@ -51,18 +53,18 @@ class RoleAdminForm(forms.ModelForm):
         cleaned_data = super().clean()
 
         custom_permissions = cleaned_data.get('custom_permissions')
-        workflow_permissions = cleaned_data.get('workflow_permissions')
         django_permissions = cleaned_data.get('django_permissions')
         permission_ids = []
+
+        print('custom_permissions: ', custom_permissions)
 
         if custom_permissions:
             permission_ids += custom_permissions.values_list('id', flat=True)
 
-        if workflow_permissions:
-            permission_ids += workflow_permissions.values_list('id', flat=True)
-
         if django_permissions:
             permission_ids += django_permissions.values_list('id', flat=True)
+
+        print('permission_ids: ', permission_ids)
 
         cleaned_data['permissions'] = Permission.objects.filter(id__in=permission_ids)
 

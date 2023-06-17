@@ -14,6 +14,7 @@ from pathlib import Path
 import os
 import os
 from dotenv import load_dotenv
+from django.utils.translation import gettext_lazy as _
 
 load_dotenv()
 
@@ -48,6 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_extensions',
 
     'django_tgbot',
     'news_clippings_bot',
@@ -106,6 +108,11 @@ DATABASES = {
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
 AUTH_USER_MODEL = 'users.User'
+
+CUSTOM_PERMISSIONS = [
+    ('manage_users', _('Manage users')),
+    ('manage_clippings', _('Manage clippings')),
+]
 
 AUTH_PASSWORD_VALIDATORS = [
     {

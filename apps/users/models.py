@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import AbstractUser, BaseUserManager, Permission, _user_has_perm, _user_has_module_perms
 from django.db import models
 
@@ -15,8 +16,8 @@ class UserManager(BaseUserManager):
         return user
 
     def create_user(self, email, password=None, **extra_fields):
-        extra_fields.setdefault('is_staff', False)
-        extra_fields.setdefault('is_superuser', False)
+        extra_fields.setdefault(_('is_staff'), False)
+        extra_fields.setdefault(_('is_superuser'), False)
         return self._create_user(email, password, **extra_fields)
 
     def create_superuser(self, email, password, **extra_fields):
@@ -24,12 +25,12 @@ class UserManager(BaseUserManager):
         return self._create_user(email, password, **extra_fields)
 
 class Role(UUIDModel):
-    name = models.CharField('Nombre', max_length=128)
+    name = models.CharField(_('name'), max_length=128)
     permissions = models.ManyToManyField(Permission)
 
     class Meta:
-        verbose_name = 'Rol'
-        verbose_name_plural = 'roles'
+        verbose_name = _('role')
+        verbose_name_plural = _('roles')
         ordering = ['name']
 
     def __str__(self):
@@ -37,9 +38,9 @@ class Role(UUIDModel):
 
 # A custom model for users that inherits from AbstractUser
 class User(UUIDModel, AbstractUser):
-    email = models.EmailField('email', unique=True)
-    role = models.ForeignKey(Role, models.SET_NULL, verbose_name='rol', null=True, blank=True)
-    telegram_id = models.CharField('ID de Telegram', max_length=128, null=True, blank=True)
+    email = models.EmailField(_('email'), unique=True)
+    role = models.ForeignKey(Role, models.SET_NULL, verbose_name=_('role'), null=True, blank=True)
+    telegram_id = models.CharField(_('telegram ID'), max_length=128, null=True, blank=True)
     objects = UserManager()
 
     username = None
@@ -47,8 +48,8 @@ class User(UUIDModel, AbstractUser):
     REQUIRED_FIELDS = ['first_name', 'last_name']
 
     class Meta:
-        verbose_name = 'usuario'
-        verbose_name_plural = 'usuarios'
+        verbose_name = _('user')
+        verbose_name_plural =  _('users')
         ordering = ['email']
 
     def __str__(self):

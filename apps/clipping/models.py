@@ -1,28 +1,34 @@
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
-class Clipping(models.Model):
-    title = models.CharField('Título', max_length=200)
-    date = models.DateField('Fecha')
-    tags = models.ManyToManyField('Tag', verbose_name='tags', related_name='articles')
-    source = models.URLField('Fuente')
-    author = models.CharField('Autor', max_length=100)
-    content = models.TextField('Contenido')
+from apps.users.models import User
 
-    class Meta:
-        verbose_name = 'Artículo'
-        verbose_name_plural = 'Artículos'
-        ordering = ['date', 'title']
-
-    def __str__(self):
-        return self.title
 
 class Tag(models.Model):
-    name = models.CharField('Nombre', max_length=100)
+    name = models.CharField(_('Name'), max_length=100)
 
     class Meta:
-        verbose_name = 'Tag'
-        verbose_name_plural = 'Tags'
+        verbose_name = _('Tag')
+        verbose_name_plural = _('Tags')
         ordering = ['name']
 
     def __str__(self):
         return self.name
+
+
+class Clipping(models.Model):
+    title = models.CharField(_('Title'), max_length=200)
+    published_on = models.DateTimeField(_('Published on'), null=True, blank=True)
+    created_at = models.DateTimeField(_('Created at'), auto_now_add=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, verbose_name=_('Created by'), null=True, blank=True)
+    tags = models.ManyToManyField(Tag, verbose_name=_('tags'), related_name='articles')
+    url = models.URLField('URL', unique=True, error_messages=_('This url has already been uploaded.'))
+    author = models.CharField(_('Author'), max_length=100, null=True, blank=True)
+
+    class Meta:
+        verbose_name = _('Article')
+        verbose_name_plural = _('Articles')
+        ordering = ['created_at', 'title']
+
+    def __str__(self):
+        return self.title
