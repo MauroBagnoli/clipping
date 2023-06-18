@@ -6,3 +6,4 @@ apps/clipping/__pycache__/
 clipping/__pycache__/
 apps/users/migrations/__pycache__/
 apps/users/management/__pycache__/
+apps/users/migrations/__pycache__/xs
