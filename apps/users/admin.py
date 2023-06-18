@@ -3,6 +3,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.utils.translation import gettext_lazy as _
+from django.contrib.auth.models import Group
 
 from .models import User
 
@@ -12,11 +13,20 @@ class UserCreationForm(forms.ModelForm):
     fields, plus a repeated password."""
     password1 = forms.CharField(label='Password', widget=forms.PasswordInput)
     password2 = forms.CharField(label='Password confirmation', widget=forms.PasswordInput)
+    groups = forms.ModelMultipleChoiceField(
+        queryset=Group.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+        required=True,
+        label='Groups'
+    )
 
     class Meta:
         model = User
-        fields = ('email',)
+        fields = ('email', 'groups',)
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['groups'].queryset = Group.objects.all()  # Actualiza el queryset del campo 'groups'
     def clean_password2(self):
         # Check that the two password entries match
         password1 = self.cleaned_data.get("password1")
@@ -32,6 +42,7 @@ class UserCreationForm(forms.ModelForm):
         user.is_staff = True
         if commit:
             user.save()
+            self.save_m2m()
         return user
 
 
@@ -82,7 +93,7 @@ class UserAdmin(BaseUserAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('email', 'password1', 'password2')}
+            'fields': ('email', 'password1', 'password2', 'groups')}
         ),
     )
     search_fields = ('email',)
