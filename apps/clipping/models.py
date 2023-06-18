@@ -15,11 +15,11 @@ class Tag(models.Model):
 
 
 class Clipping(models.Model):
-    title = models.CharField(_('Title'), max_length=200)
+    title = models.CharField(_('Title'), max_length=200, null=True, blank=True)
     published_on = models.DateTimeField(_('Published on'), null=True, blank=True)
     created_at = models.DateTimeField(_('Created at'), auto_now_add=True)
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, verbose_name=_('Created by'), null=True, blank=True)
-    tags = models.ManyToManyField(Tag, verbose_name=_('tags'), related_name='articles')
+    tags = models.ManyToManyField(Tag, verbose_name=_('tags'), related_name='articles', null=True, blank=True)
     url = models.URLField('URL', unique=True, error_messages=_('This url has already been uploaded.'))
     author = models.CharField(_('Author'), max_length=100, null=True, blank=True)
 
@@ -29,4 +29,4 @@ class Clipping(models.Model):
         ordering = ['created_at', 'title']
 
     def __str__(self):
-        return self.title
+        return self.url

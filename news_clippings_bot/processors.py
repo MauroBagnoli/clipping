@@ -95,85 +95,83 @@ def validate_email(bot: TelegramBot, update: Update, state: TelegramState):
     from_states=STATES['USER_IS_AUTHENTICATED'],
 )
 def handle_clipping_entry(bot: TelegramBot, update: Update, state: TelegramState):
-    # TODO: Get userIds Queryset
-    authorized_user_ids = list(User.objects.all().values_list('telegram_id', flat=True))
+    try:
+        # UPDATE
+        user_id = update.get_user().get_id()
 
-    print('authorized_user_ids: ', authorized_user_ids)
+        user_is_authenticated = User.objects.filter(telegram_id=user_id).exists()
 
-    # UPDATE
-    user_id = update.get_user().get_id()
+        if not user_is_authenticated:
+            state.set_name('')
+            bot.sendMessage(update.get_chat().get_id(), _('Looks like you are not authenticated, please contact the administrator'))
+            raise ProcessFailure('User not authenticated')
 
-    user_is_authenticated = User.objects.filter(telegram_id=user_id).exists()
+        new_clipping = {}
+        user_message = update.get_message().get_text()
+        print('user_message: ', user_message)
 
-    if not user_is_authenticated:
-        state.set_name('')
-        bot.sendMessage(update.get_chat().get_id(), _('Looks like you are not authenticated, please contact the administrator'))
-        raise ProcessFailure('User not authenticated')
+        urls = get_urls_from_message(user_message)
+        url = None
 
-    new_clipping = {}
-    user_message = update.get_message().get_text()
-    print('user_message: ', user_message)
+        if len(urls) > 1:
+            bot.sendMessage(update.get_chat().get_id(), _('Too many URLs, I can handle only one'))
+            raise ProcessFailure('Invalid URL')
+        elif len(urls) == 1:
+            url = urls[0]
+            print('url: ', url)
 
-    urls = get_urls_from_message(user_message)
-    url = None
-
-    if len(urls) > 1:
-        bot.sendMessage(update.get_chat().get_id(), _('Too many URLs, I can handle only one'))
-        raise ProcessFailure('Invalid URL')
-    elif len(urls) == 1:
-        url = urls[0]
-        print('url: ', url)
-
-    is_valid_url = type(url) == str
-    print('is_valid_url: ', is_valid_url)
+        is_valid_url = type(url) == str
+        print('is_valid_url: ', is_valid_url)
 
 
-    # We know there's only one url and it's valid
-    if is_valid_url:
-        user_message_without_url = get_message_without_urls(user_message)
-        print('user_message_without_url: ', user_message_without_url)
+        # We know there's only one url and it's valid
+        if is_valid_url:
+            user_message_without_url = get_message_without_urls(user_message)
+            print('user_message_without_url: ', user_message_without_url)
 
-        new_clipping['url'] = url
+            new_clipping['url'] = url
 
-        # extract autor
-        if 'autor:' in user_message_without_url:
-            new_clipping['author'] = get_author_from_message(user_message_without_url)
-            print("new_clipping['author']", new_clipping['author'])
-        
-        # extract tag
-        if ('tags:' or 'tag:') in user_message_without_url:
-            new_clipping['tags'] = get_tag_from_message(user_message_without_url)
-            print('new_clipping.tags: ', new_clipping['tags'])
-        
-        # TODO: GET TITLE FROM WEB HEADER
+            # extract autor
+            if 'autor:' in user_message_without_url:
+                new_clipping['author'] = get_author_from_message(user_message_without_url)
+                print("new_clipping['author']", new_clipping['author'])
+            
+            # extract tag
+            if ('tags:' or 'tag:') in user_message_without_url:
+                new_clipping['tags'] = get_tag_from_message(user_message_without_url)
+                print('new_clipping.tags: ', new_clipping['tags'])
+            
+            # TODO: GET TITLE FROM WEB HEADER
 
-        user = User.objects.get(telegram_id=user_id)
+            user = User.objects.get(telegram_id=user_id)
 
-        # Save to database
-        try:
-            Clipping.objects.create(
-                url=new_clipping['url'],
-                created_by=user
-            )
-        except IntegrityError as e:
-            print(str (e))
-            if 'duplicate key value violates unique constraint' in str (e):
+            # Save to database
+            try:
+                Clipping.objects.create(
+                    url=new_clipping['url'],
+                    created_by=user
+                )
+            except IntegrityError as e:
+                print(str (e))
+                if 'duplicate key value violates unique constraint' in str (e):
+                    bot.sendMessage(
+                        update.get_chat().get_id(),
+                        _('The URL of this Clipping is already stored in the database')
+                    )
+                    raise ProcessFailure('The URL is already stored in the database') 
+
                 bot.sendMessage(
                     update.get_chat().get_id(),
-                    _('The URL of this Clipping is already stored in the database')
+                    _('There has been a problem when saving the instance, try again or contact the administrator')
                 )
-                raise ProcessFailure('The URL is already stored in the database') 
+                raise ProcessFailure('an Error ocurred while saving istance to the Database')
 
             bot.sendMessage(
                 update.get_chat().get_id(),
-                _('There has been a problem when saving the instance, try again or contact the administrator')
+                _('The clipping has been saved in the database, thanks!')
             )
-            raise ProcessFailure('an Error ocurred while saving istance to the Database')
-
-        bot.sendMessage(
-            update.get_chat().get_id(),
-            _('The clipping has been saved in the database, thanks!')
-        )
-    else:
-        _('There has been a problem with the URL provided, try again or contact the administrator')
-        raise ProcessFailure('The URL is invalid')
+        else:
+            _('There has been a problem with the URL provided, try again or contact the administrator')
+            raise ProcessFailure('The URL is invalid')
+    except Exception:
+        print('ERROR ====> ', Exception)

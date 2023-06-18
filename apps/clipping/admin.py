@@ -7,11 +7,9 @@ class ClippingAdmin(admin.ModelAdmin):
     list_display = ['url', 'title', 'author', 'created_by', 'published_on']
     search_fields = [
         'title__unaccent__icontains',
-        'tags__unaccent__icontains',
-        'url__unaccent__icontains',
         'author__unaccent__icontains',
     ]
-    list_filter = ['author']
+    list_filter = ['author', 'tags']
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
