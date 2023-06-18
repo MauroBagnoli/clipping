@@ -1,3 +1,7 @@
 .vscode
 .env
 clipping/.env
+apps/users/__pycache__/*
+apps/clipping/__pycache__/*
+clipping/__pycache__/*
+apps/users/migrations/__pycache__/*
