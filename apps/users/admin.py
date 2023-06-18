@@ -1,74 +1,92 @@
+from django import forms
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.utils.translation import gettext_lazy as _
-from django.contrib.auth.decorators import user_passes_test
-from django.contrib.auth.forms import SetPasswordForm
-from django.http import HttpResponseRedirect
-from django.shortcuts import render
-from django.contrib.auth import update_session_auth_hash
 
-from .models import User, Role
-from .forms import CreateUserAdminForm, RoleAdminForm
-from django.contrib.auth.models import Group
-
-# In admin.py
-from django.contrib import admin
-from django.contrib.auth.decorators import permission_required
 from .models import User
 
-admin.site.unregister(Group)
+
+class UserCreationForm(forms.ModelForm):
+    """A form for creating new users. Includes all the required
+    fields, plus a repeated password."""
+    password1 = forms.CharField(label='Password', widget=forms.PasswordInput)
+    password2 = forms.CharField(label='Password confirmation', widget=forms.PasswordInput)
+
+    class Meta:
+        model = User
+        fields = ('email',)
+
+    def clean_password2(self):
+        # Check that the two password entries match
+        password1 = self.cleaned_data.get("password1")
+        password2 = self.cleaned_data.get("password2")
+        if password1 and password2 and password1 != password2:
+            raise forms.ValidationError("Passwords don't match")
+        return password2
+
+    def save(self, commit=True):
+        # Save the provided password in hashed format
+        user = super(UserCreationForm, self).save(commit=False)
+        user.set_password(self.cleaned_data["password1"])
+        user.is_staff = True
+        if commit:
+            user.save()
+        return user
 
 
-@admin.register(Role)
-class RoleAdmin(admin.ModelAdmin):
-    list_display = ['name']
-    search_fields = [
-        'name__unaccent__icontains',
-        'permissions__unaccent__icontains',
-    ]
-    form = RoleAdminForm
+class UserChangeForm(forms.ModelForm):
+    """A form for updating users. Includes all the fields on
+    the user, but replaces the password field with admin's
+    password hash display field.
+    """
+    password = ReadOnlyPasswordHashField()
 
-    def get_permission_count(self, obj):
-        print('permission count: ', obj.permissions.count())
-        return obj.permissions.count()
+    class Meta:
+        model = User
+        fields = ('email', 'password', 'is_active', 'groups')
 
-    get_permission_count.short_description = _('permission count')
+    def clean_password(self):
+        # Regardless of what the user provides, return the initial value.
+        # This is done here, rather than on the f ield, because the
+        # field does not have access to the initial value
+        return self.initial["password"]
 
 
-@admin.register(User)
-class UserAdmin(admin.ModelAdmin):
+class UserAdmin(BaseUserAdmin):
+    form = UserChangeForm
+    add_form = UserCreationForm
     actions = ['change_password']
 
     def change_password(self, request, queryset):
-        if request.POST.get('post'):
-            form = SetPasswordForm(user=request.user, data=request.POST)
-            if form.is_valid():
-                for user in queryset:
-                    print('form.cleaned_data[new_password1]: ', form.cleaned_data['new_password1'])
-                    user.set_password(form.cleaned_data['new_password1'])
-                    user.save()
-                    update_session_auth_hash(request, user)
-                self.message_user(request, "Password changed successfully.")
-                return HttpResponseRedirect(request.get_full_path())
-        else:
-            form = SetPasswordForm(user=request.user)
+        for user in queryset:
+            new_password = 'admin'
+            user.set_password(new_password)
+            user.save()
+            self.message_user(request, _("The {email} password has been changed to the default password 'admin'.").format(email=user.email))
+        return None
+    
+    change_password.short_description = _("Change password to default password 'admin'")
 
-        return render(request, 'admin/change_password.html', {'form': form})
-    list_display = ['email', 'first_name', 'last_name','role']
-    readonly_fields = ['telegram_id']
+    # The fields to be used in displaying the User model.
+    # These override the definitions on the base UserAdmin
+    # that reference specific fields on auth.User.
+    list_display = ('email', 'first_name', 'last_name')
+    fieldsets = (
+        (None, {'fields': ('email', 'password', 'telegram_id')}),
+        ('groups', {'fields': ('groups',)}),
+    )
+    readonly_fields=['telegram_id']
+    # add_fieldsets is not a standard ModelAdmin attribute. UserAdmin
+    # overrides get_fieldsets to use this attribute when creating a user.
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('email', 'password1', 'password2')}
+        ),
+    )
+    search_fields = ('email',)
+    ordering = ('email',)
+    filter_horizontal = ()
 
-    exclude=['groups']
-    search_fields = [
-        'email__unaccent__icontains',
-        'first_name__unaccent__icontains',
-        'last_name__unaccent__icontains',
-    ]
-    form = CreateUserAdminForm
-    list_filter = ['role']
-    permissions = [ ('manage_users', _('Manage users')) ]
-
-    def get_form(self, request, obj=None, **kwargs):
-        form = super().get_form(request, obj, **kwargs)
-        if obj:
-            print('form.base_fields: ', form.base_fields)
-            # form.base_fields.pop('password', None)
-        return form
+admin.site.register(User, UserAdmin)

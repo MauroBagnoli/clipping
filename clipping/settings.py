@@ -79,6 +79,7 @@ TEMPLATES = [
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
+                'django.template.context_processors.csrf',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
@@ -108,11 +109,6 @@ DATABASES = {
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
 AUTH_USER_MODEL = 'users.User'
-
-CUSTOM_PERMISSIONS = [
-    ('manage_users', _('Manage users')),
-    ('manage_clippings', _('Manage clippings')),
-]
 
 AUTH_PASSWORD_VALIDATORS = [
     {
