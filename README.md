@@ -77,40 +77,6 @@
 
 ### Users must be created in the admin page to be recognized by the bot by the email provided
 
-## WEBHOOK UPDATE
-
-### [tgbotwebhook](https://django-tgbot.readthedocs.io/en/latest/management_commands/tgbotwebhook/)
-
-## Download Telegram for testing purposes Telegram: Contact @BotFather
-
-### Create your API Token using BotFather
-
-Enter this command in the command line:
-
-```bash
-> python3 manage.py createtgbot
-```
-
-Enter your API token:
-
-```bash
-> python3 manage.py createtgbot
-```
-
-Enter the bot token (retrieved from BotFather): <YOUR_TOKEN>
-Setting up @BotDevTestBot ...
-Enter the URL your Django project is deployed on
-(if you have not deployed yet and want to test your bot, you can use services like Ngrok to do so).
-
-### Check the app in INSTALLED_APPS in django's project folder
-
-### Update the database
-
-```bash
-> python3 manage.py makemigrations
-> python3 manage.py migrate
-```
-
 ### Install ngrok
 
 [ngrok](https://ngrok.com/download)
@@ -121,11 +87,46 @@ Enter the URL your Django project is deployed on
 > ngrok config add-authtoken <token>
 ```
 
-### Create url
+### Create ngrok url
 
 ```bash
 > ngrok http 80
 ```
+
+## WEBHOOK UPDATE
+
+### [tgbotwebhook](https://django-tgbot.readthedocs.io/en/latest/management_commands/tgbotwebhook/)
+
+## Download Telegram for testing purposes Telegram: Contact @BotFather
+
+### Create your API Token using BotFather
+
+Enter this command in the command line and enter your API token:
+
+```bash
+> python3 manage.py createtgbot
+Enter the bot token (retrieved from BotFather): <YOUR_TOKEN>
+Setting up @BotDevTestBot ...
+Enter the URL your Django project is deployed on
+(if you have not deployed yet and want to test your bot, you can use services like Ngrok to do so).
+```
+
+### Set bot token
+
+```bash
+> python3 manage.py tgbottoken
+```
+
+### Check the app in INSTALLED_APPS in django's project folder
+
+### Update the database
+
+```bash
+> python3 manage.py makemigrations
+> python3 manage.py migrate
+```
+
+### Connect bot with your ngrok url
 
 ```bash
 > python3 manage.py tgbotwebhook
@@ -134,6 +135,14 @@ Choose option 1
 Paste ngrok url
 Confirm (Y)
 ```
+
+### Don't forget to open another terminal for Django
+
+```bash
+> python3 manage.py runserver
+```
+
+### Open Telegram and Search for @news_clippings_bot
 
 ## Django translations
 

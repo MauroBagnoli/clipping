@@ -50,7 +50,7 @@ def handle_authentication(bot: TelegramBot, update: Update, state: TelegramState
             user_sent_passphrase = user_message == BOT_PASSPHRASE
         
             if user_sent_passphrase:
-                bot.sendMessage(update.get_chat().get_id(), _('With what email are you registered in the app?'))
+                bot.sendMessage(update.get_chat().get_id(), _('Which email are you registered with in the app?'))
                 state.set_name(STATES['ASKED_FOR_EMAIL'])
             else:
                 raise ProcessFailure('User is not authenticated')
@@ -74,18 +74,18 @@ def validate_email(bot: TelegramBot, update: Update, state: TelegramState):
     is_valid_email = get_is_valid_email(user_message)
 
     if not is_valid_email:
-        bot.sendMessage(update.get_chat().get_id(), _('The email format is not valid'))
-        raise ProcessFailure('Invalid email address format')
+        bot.sendMessage(update.get_chat().get_id(), _('The email format is not valid. Enter the passphrase to try again.'))
+        raise ProcessFailure('Invalid email address format.')
 
     try:
         user = User.objects.get(email=user_message)
         user.telegram_id = user_id
         user.save()
 
-        bot.sendMessage(update.get_chat().get_id(), _('Welcome! You can now post news clippings in this chat'))
+        bot.sendMessage(update.get_chat().get_id(), _('Welcome! You can now post news clippings in this chat.'))
         state.set_name(STATES['USER_IS_AUTHENTICATED'])
     except ObjectDoesNotExist:
-        bot.sendMessage(update.get_chat().get_id(), _('Your email is not registerd, please contact the administrator'))
+        bot.sendMessage(update.get_chat().get_id(), _('Your email is not registered. Please contact the administrator.'))
         state.set_name('')
 
 
@@ -103,8 +103,8 @@ def handle_clipping_entry(bot: TelegramBot, update: Update, state: TelegramState
 
         if not user_is_authenticated:
             state.set_name('')
-            bot.sendMessage(update.get_chat().get_id(), _('Looks like you are not authenticated, please contact the administrator'))
-            raise ProcessFailure('User not authenticated')
+            bot.sendMessage(update.get_chat().get_id(), _('It seems like you are not authenticated. Please contact the administrator.'))
+            raise ProcessFailure('User not authenticated.')
 
         new_clipping = {}
         user_message = update.get_message().get_text()
@@ -114,8 +114,8 @@ def handle_clipping_entry(bot: TelegramBot, update: Update, state: TelegramState
         url = None
 
         if len(urls) > 1:
-            bot.sendMessage(update.get_chat().get_id(), _('Too many URLs, I can handle only one'))
-            raise ProcessFailure('Invalid URL')
+            bot.sendMessage(update.get_chat().get_id(), _('Too many URLs. I can only handle one.'))
+            raise ProcessFailure('Invalid URL.')
         elif len(urls) == 1:
             url = urls[0]
             print('url: ', url)
@@ -156,22 +156,22 @@ def handle_clipping_entry(bot: TelegramBot, update: Update, state: TelegramState
                 if 'duplicate key value violates unique constraint' in str (e):
                     bot.sendMessage(
                         update.get_chat().get_id(),
-                        _('The URL of this Clipping is already stored in the database')
+                        _('The URL of this clipping is already stored in the database.')
                     )
-                    raise ProcessFailure('The URL is already stored in the database') 
+                    raise ProcessFailure('The URL of this clipping is already stored in the database.') 
 
                 bot.sendMessage(
                     update.get_chat().get_id(),
-                    _('There has been a problem when saving the instance, try again or contact the administrator')
+                    _('There was an issue when saving the instance. Please try again or contact the administrator.')
                 )
-                raise ProcessFailure('an Error ocurred while saving istance to the Database')
+                raise ProcessFailure('An error occurred while saving the instance to the database.')
 
             bot.sendMessage(
                 update.get_chat().get_id(),
-                _('The clipping has been saved in the database, thanks!')
+                _('The clipping has been successfully saved in the database. Thank you!')
             )
         else:
-            _('There has been a problem with the URL provided, try again or contact the administrator')
-            raise ProcessFailure('The URL is invalid')
+            _('There was a problem with the provided URL. Please try again or contact the administrator.')
+            raise ProcessFailure('The URL is invalid.')
     except Exception:
         print('ERROR ====> ', Exception)
