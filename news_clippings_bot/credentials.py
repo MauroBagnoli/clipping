@@ -1,3 +1,10 @@
-# Do not remove these 2 lines:
-BOT_TOKEN = '5995977065:AAGzwtwZqJ9ZgiPka55WzxBhvD2JSv4am5s'  # You should consider using env variables or a secret manager for this.
-APP_NAME = 'news_clippings_bot'
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+BOT_TOKEN_ENV = os.getenv('BOT_TOKEN')
+APP_NAME_ENV = os.getenv('APP_NAME')
+
+BOT_TOKEN = BOT_TOKEN_ENV
+APP_NAME = APP_NAME_ENV

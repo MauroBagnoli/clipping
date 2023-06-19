@@ -4,14 +4,12 @@ from .models import Clipping, Tag
 
 @admin.register(Clipping)
 class ClippingAdmin(admin.ModelAdmin):
-    list_display = ['title', 'date', 'source', 'author']
+    list_display = ['url', 'title', 'author', 'created_by', 'published_on']
     search_fields = [
         'title__unaccent__icontains',
-        'tags__unaccent__icontains',
-        'source__unaccent__icontains',
         'author__unaccent__icontains',
     ]
-    list_filter = ['author']
+    list_filter = ['author', 'tags']
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):

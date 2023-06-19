@@ -1,0 +1,54 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-06-16 00:00+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+#: apps/users/forms.py:18 apps/users/forms.py:19
+msgid "Custom permissions"
+msgstr "Permisos personalizados"
+
+#: apps/users/forms.py:24 apps/users/forms.py:25
+msgid "Django permissions"
+msgstr "Permisos de Django"
+
+#: apps/users/forms.py:77 apps/users/forms.py:117
+msgid "This user is inactive."
+msgstr "El usuario está inactivo"
+
+#: apps/users/forms.py:78
+msgid "Please enter a correct email and password."
+msgstr "Por favor ingresa un email y password correctos"
+
+#: apps/users/forms.py:116
+msgid "There is no registered user with that email."
+msgstr "No hay usuarios registrados con ese email"
+
+#: apps/users/forms.py:118
+msgid "More than one user with same email."
+msgstr "Más de un usuario con el mismo email"
+
+#: apps/users/forms.py:153
+msgid "Link is invalid or expired, please restart the process and try again."
+msgstr "El link es inválido o ha expirado, por favor reinicia el proceso e intenta de nuevo"
+
+#: apps/users/forms.py:205
+msgid "Current password is incorrect."
+msgstr "La contraseña es incorrecta"
+
+#: news_clippings_bot/processors.py:59
+msgid "Too many URLs, I can handle only one"
+msgstr "Demasiadas URLs, solo puedo manejar una"

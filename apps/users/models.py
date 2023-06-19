@@ -1,45 +1,49 @@
 from django.conf import settings
+from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import AbstractUser, BaseUserManager, Permission, _user_has_perm, _user_has_module_perms
 from django.db import models
 
+from django.contrib.auth.models import PermissionsMixin 
 from model_utils.models import UUIDModel
 
-class UserManager(BaseUserManager):
-    use_in_migrations = True
+from django.db import models
+from django.contrib.auth.models import (
+    BaseUserManager, AbstractBaseUser
+)
 
-    def _create_user(self, email, password, **extra_fields):
-        email = self.normalize_email(email)
-        user = self.model(email=email, **extra_fields)
+
+class UserManager(BaseUserManager):
+    def create_user(self, email, date_of_birth, password=None):
+        """
+        Creates and saves a User with the given email and password.
+        """
+        if not email:
+            raise ValueError('Users must have an email address')
+
+        user = self.model(
+            email=self.normalize_email(email),
+        )
+
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_user(self, email, password=None, **extra_fields):
-        extra_fields.setdefault('is_staff', False)
-        extra_fields.setdefault('is_superuser', False)
-        return self._create_user(email, password, **extra_fields)
+    def create_superuser(self, email, date_of_birth, password):
+        """
+        Creates and saves a superuser with the given email, and password.
+        """
+        user = self.create_user(email,
+            password=password,
+        )
+        user.is_admin = True
+        user.save(using=self._db)
+        return user
 
-    def create_superuser(self, email, password, **extra_fields):
-        extra_fields.update({'is_staff': True, 'is_superuser': True})
-        return self._create_user(email, password, **extra_fields)
-
-class Role(UUIDModel):
-    name = models.CharField('Nombre', max_length=128)
-    permissions = models.ManyToManyField(Permission)
-
-    class Meta:
-        verbose_name = 'Rol'
-        verbose_name_plural = 'roles'
-        ordering = ['name']
-
-    def __str__(self):
-        return self.name
 
 # A custom model for users that inherits from AbstractUser
-class User(UUIDModel, AbstractUser):
-    email = models.EmailField('email', unique=True)
-    role = models.ForeignKey(Role, models.SET_NULL, verbose_name='rol', null=True, blank=True)
-
+class User(UUIDModel, AbstractUser, PermissionsMixin):
+    email = models.EmailField(_('email'), unique=True)
+    telegram_id = models.CharField(_('telegram ID'), max_length=128, null=True, blank=True)
     objects = UserManager()
 
     username = None
@@ -47,8 +51,8 @@ class User(UUIDModel, AbstractUser):
     REQUIRED_FIELDS = ['first_name', 'last_name']
 
     class Meta:
-        verbose_name = 'usuario'
-        verbose_name_plural = 'usuarios'
+        verbose_name = _('user')
+        verbose_name_plural =  _('users')
         ordering = ['email']
 
     def __str__(self):
@@ -69,4 +73,3 @@ class User(UUIDModel, AbstractUser):
     def has_module_perms(self, app_label):
         # Always check with the auth backend.
         return _user_has_module_perms(self, app_label)
-
