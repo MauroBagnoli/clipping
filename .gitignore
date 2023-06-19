@@ -10,3 +10,4 @@ apps/users/migrations/__pycache__/xs
 news_clippings_bot/__pycache__/
 apps/clipping/migrations/__pycache__/
 news_clippings_bot/migrations/__pycache__/
+venv/
