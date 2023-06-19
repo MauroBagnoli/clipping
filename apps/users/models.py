@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
-from django.contrib.auth.models import AbstractUser, BaseUserManager, Permission, _user_has_perm, _user_has_module_perms
+from django.contrib.auth.models import AbstractUser, BaseUserManager, _user_has_perm, _user_has_module_perms
 from django.db import models
 
 from django.contrib.auth.models import PermissionsMixin 
@@ -8,12 +8,11 @@ from model_utils.models import UUIDModel
 
 from django.db import models
 from django.contrib.auth.models import (
-    BaseUserManager, AbstractBaseUser
+    BaseUserManager
 )
 
-
 class UserManager(BaseUserManager):
-    def create_user(self, email, date_of_birth, password=None):
+    def create_user(self, email, password=None, **extra_fields):
         """
         Creates and saves a User with the given email and password.
         """
@@ -22,19 +21,20 @@ class UserManager(BaseUserManager):
 
         user = self.model(
             email=self.normalize_email(email),
+            **extra_fields
         )
 
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, date_of_birth, password):
+    def create_superuser(self, email, password, **extra_fields):
         """
         Creates and saves a superuser with the given email, and password.
         """
-        user = self.create_user(email,
-            password=password,
-        )
+        user = self.create_user(email, password=password, **extra_fields)
+        user.is_staff = True
+        user.is_superuser = True
         user.is_admin = True
         user.save(using=self._db)
         return user

@@ -8,33 +8,69 @@
 ### Create the virtualenv and activate it
 
 ```bash
-python -m venv ./venv
-source ./venv/bin/activate
+> python3 -m venv ./venv
+> source ./venv/bin/activate
+```
+
+### Install the postgres
+
+```bash
+> brew install postgresql
 ```
 
 ### Install the requirements
 
 ```bash
-pip install -r requirements.txt
+> pip3 install -r requirements.txt
+```
+
+### Create the database
+
+```bash
+> brew services start postgresql
+> createdb marilles
+```
+
+### Create rol marilles
+
+```bash
+> createuser -P -s marilles 
+```
+
+```bash
+> createuser -P marilles
+> createuser -P -s postgres
+> psql -U postgres -c "ALTER USER marilles WITH SUPERUSER;"
 ```
 
 ### Run the migrations
 
 ```bash
-python manage.py makemigrations
-python manage.py migrate
+> python3 manage.py makemigrations
+> python3 manage.py migrate
 ```
 
 ### Create your superuser
 
 ```bash
-python manage.py createsuperuser
+> python3 manage.py createsuperuser
+```
+
+### Copy .env.template and rename it to .env
+
+### Create SECRET_KEY
+
+```bash
+> python3 manage.py shell_plus
+>>> from django.core.management.utils import get_random_secret_key
+>>> get_random_secret_key()
 ```
 
 ### Run the django backend
 
 ```bash
-python manage.py runserver
+> python3 manage.py runserver
+> http://127.0.0.1:8000/admin
 ```
 
 ## Authentication
@@ -52,13 +88,13 @@ python manage.py runserver
 Enter this command in the command line:
 
 ```bash
-> python manage.py createtgbot
+> python3 manage.py createtgbot
 ```
 
 Enter your API token:
 
 ```bash
-> python manage.py createtgbot
+> python3 manage.py createtgbot
 ```
 
 Enter the bot token (retrieved from BotFather): <YOUR_TOKEN>
@@ -71,8 +107,8 @@ Enter the URL your Django project is deployed on
 ### Update the database
 
 ```bash
-> python manage.py makemigrations
-> python manage.py migrate
+> python3 manage.py makemigrations
+> python3 manage.py migrate
 ```
 
 ### Install ngrok
@@ -104,21 +140,25 @@ Confirm (Y)
 ### Make messages
 
 ```bash
-python3 manage.py makemessages --locale es
+> python3 manage.py makemessages --locale es
 ```
 
 ### Compile messages
 
 ```bash
-python3 manage.py compilemessages --locale es
+> python3 manage.py compilemessages --locale es
 ```
 
 ## TO DROP DATABASE
 
 ```bash
-\connect postgres
+> \connect postgres
 ```
 
-### Drop database marilles
+```bash
+> drop database marilles
+```
 
-### Create database marilles
+```bash
+> create database marilles
+```
