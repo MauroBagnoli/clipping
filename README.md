@@ -12,7 +12,7 @@
 > source ./venv/bin/activate
 ```
 
-### Install the postgres
+### Install postgres
 
 ```bash
 > brew install postgresql
@@ -28,19 +28,16 @@
 
 ```bash
 > brew services start postgresql
-> createdb marilles
+> createdb botdb
 ```
 
-### Create rol marilles
+### Create user admin
+
 
 ```bash
-> createuser -P -s marilles 
-```
-
-```bash
-> createuser -P marilles
+> createuser -P admin
 > createuser -P -s postgres
-> psql -U postgres -c "ALTER USER marilles WITH SUPERUSER;"
+> psql -U postgres -c "ALTER USER admin WITH SUPERUSER;"
 ```
 
 ### Run the migrations
@@ -165,9 +162,9 @@ Confirm (Y)
 ```
 
 ```bash
-> drop database marilles
+> drop database botdb
 ```
 
 ```bash
-> create database marilles
+> create database botdb
 ```

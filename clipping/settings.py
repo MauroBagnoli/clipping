@@ -96,10 +96,10 @@ WSGI_APPLICATION = 'clipping.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'marilles',
-        'USER': 'marilles',
-        'PASSWORD': 'clipping',
-        'HOST': 'localhost'
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('USER'),
+        'PASSWORD': os.getenv('PASSWORD'),
+        'HOST': os.getenv('HOST')
     }
 }
 
