@@ -1,9 +1,9 @@
 
 # Telegram Bots + Django
 
-## [django-tgbot](https://github.com/Ali-Toosi/django-tgbot)
+This Django application integrates with Telegram Bot API to allow users to send news articles to a Telegram bot. The bot then stores these articles in a database for later retrieval and analysis.
 
-## Django Backend
+## Installation
 
 ### Create the virtualenv and activate it
 
